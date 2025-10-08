@@ -5,14 +5,18 @@ import {getRepos} from "../actions/repos";
 import Repo from "./repo/Repo";
 import {setCurrentPage} from "../../reducers/reposReduser";
 import {createPages} from "../../utils/pagesCreator";
+import {useNavigate} from "react-router-dom";
 
 const Main = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
     const repos = useSelector(state => state.repos.items);
     const isFetching = useSelector(state => state.repos.isFetching);
     const currentPage = useSelector(state => state.repos.currentPage);
     const totalCount = useSelector(state => state.repos.totalCount);
     const perPage = useSelector(state => state.repos.perPage);
+    const isFetchError = useSelector(state => state.repos.isFetchError);
 
     const [searchValue, setSearchValue] = useState('');
 
@@ -29,10 +33,21 @@ const Main = () => {
         dispatch(getRepos(searchValue, currentPage, perPage));
     }
 
+    // if(isFetchError) {
+    //     navigate('/error');
+    // }
+
     return (
         <div>
+            {
+              isFetchError &&
+              <div className="alert alert-danger" role="alert">
+                  Произвольна ошибка! Пожалуйста обновите страницу!
+              </div>
+            }
             <div className="search">
-                <input value={searchValue} onChange={(e) => setSearchValue(e.target.value)} type="text" placeholder='Input repo name' className='search-input'/>
+                <input value={searchValue} onChange={(e) => setSearchValue(e.target.value)} type="text"
+                       placeholder='Input repo name' className='search-input'/>
                 <button className='search-btn' onClick={() => searchHandler()}>Search</button>
             </div>
             {

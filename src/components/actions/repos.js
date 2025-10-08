@@ -1,18 +1,32 @@
 import axios from 'axios';
-import {setIsFetching, setRepos} from "../../reducers/reposReduser";
+import {setIsFetching, setRepos, setIsFetchError} from "../../reducers/reposReduser";
 
 export const getRepos = (searchQuery = 'stars:%3E1', currentPage, perPage) => {
     if(searchQuery == "") {
         searchQuery = 'stars:%3E1'
     }
     return async (dispatch) => {
-        dispatch(setIsFetching(true))
-        const response = await axios.get(`https://api.github.com/search/repositories?q=${searchQuery}&sort=stars&per_page=${perPage}&page=${currentPage}`)
-        dispatch(setRepos(response.data));
+       try {
+           dispatch(setIsFetching(true))
+           const response = await axios.get(`https://api.github.com/search/repositories?q=${searchQuery}&sort=stars&per_page=${perPage}&page=${currentPage}`)
+           dispatch(setRepos(response.data));
+       } catch (e ) {
+           dispatch(setIsFetchError(true))
+           dispatch(setIsFetching(false))
+           setTimeout(() => {
+                dispatch(setIsFetchError(false))
+           }, 2000)
+       }
     }
 }
 
 
-export const getCurrentRepo = async (username, repoName) => {
-    const response = await axios.get(``);
+export const getCurrentRepo = async (username, repoName, setRepo) => {
+    const response = await axios.get(`https://api.github.com/repos/${username}/${repoName}`);
+    setRepo(response.data);
+}
+
+export const getContributors = async (username, repoName, setContributors) => {
+    const response = await axios.get(`https://api.github.com/repos/${username}/${repoName}/contributors?page=1&per_page=10`);
+    setContributors(response.data);
 }
